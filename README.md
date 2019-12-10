@@ -7,7 +7,7 @@
 There is a problem that lldb import xia0LLDB  in last macOS Catalina, because the last macOS's lldb default use python3. Here is a way to change it to python2
 
 ```
-defaults write com.apple.dt.lldb DefaultPythonVersion 2
+defaults write com.apple.dt.lldb DefaultPythonVersion 3
 ```
 
 thanks to xqwang@wxq491216 provide this solution.  I will update xia0LLDB with python3 soon.
