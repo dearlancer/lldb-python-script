@@ -1,12 +1,12 @@
- #  ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ 
- # |______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______| 
- #        _        ___  _      _      _____  ____   
- #       (_)      / _ \| |    | |    |  __ \|  _ \  
- #  __  ___  __ _| | | | |    | |    | |  | | |_) | 
- #  \ \/ / |/ _` | | | | |    | |    | |  | |  _ <  
- #   >  <| | (_| | |_| | |____| |____| |__| | |_) | 
- #  /_/\_\_|\__,_|\___/|______|______|_____/|____/                                                                                                                   
- #  ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ 
+ #  ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______
+ # |______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|
+ #        _        ___  _      _      _____  ____
+ #       (_)      / _ \| |    | |    |  __ \|  _ \
+ #  __  ___  __ _| | | | |    | |    | |  | | |_) |
+ #  \ \/ / |/ _` | | | | |    | |    | |  | |  _ <
+ #   >  <| | (_| | |_| | |____| |____| |__| | |_) |
+ #  /_/\_\_|\__,_|\___/|______|______|_____/|____/
+ #  ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______
  # |______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|
 
 import lldb
@@ -28,24 +28,24 @@ def __lldb_init_module(debugger, internal_dict):
     print('\txbr [-f BlockSymbolFile]')
     print('\tmore usage, try "sbt -h"')
 
-                    
+
 def handle_command(debugger, command, exe_ctx, result, internal_dict):
     global BLOCK_JSON_FILE, IS_NO_COLOR_OUTPUT
-    
+
     '''
     Symbolicate backtrace. Will symbolicate a stripped backtrace
-    from an executable if the backtrace is using Objective-C 
+    from an executable if the backtrace is using Objective-C
     code. Currently doesn't support block symbolicating :)
     '''
     command_args = shlex.split(command, posix=False)
     parser = generate_option_parser()
-    
+
     try:
         (options, args) = parser.parse_args(command_args)
     except:
         result.SetError(parser.usage)
         return
-        
+
     if options.nocolor:
         result.AppendMessage("set no color")
         IS_NO_COLOR_OUTPUT = True
@@ -53,7 +53,7 @@ def handle_command(debugger, command, exe_ctx, result, internal_dict):
     if options.verbose:
         BLOCK_JSON_FILE = None
 
-        
+
     result.AppendMessage('  ==========================================xia0LLDB===========================================')
     if options.file:
         BLOCK_JSON_FILE = str(options.file)
@@ -80,7 +80,7 @@ def handle_command(debugger, command, exe_ctx, result, internal_dict):
     frameString = symbolishStackTraceFrame(debugger,target,thread)
     # return 2 screen
     result.AppendMessage(str(frameString))
-    return 
+    return
 
 
 def symbolishStackTraceFrame(debugger,target, thread):
@@ -124,16 +124,16 @@ def symbolishStackTraceFrame(debugger,target, thread):
                     num=idx, addr=hex(load_addr), mod=attrStr(str(f.addr.module.file.basename), 'yellow'),
                     func='%s [inlined]' % function if f.IsInlined() else function,
                     file=f.addr.symbol.name)
-        
+
         idx = idx + 1
     return frame_string
 
-def attrStr(msg, color='black'):   
+def attrStr(msg, color='black'):
     global IS_NO_COLOR_OUTPUT
 
     if IS_NO_COLOR_OUTPUT:
         return msg
-    
+
     clr = {
     'cyan' : '\033[36m',
     'grey' : '\033[2m',
@@ -165,7 +165,7 @@ def chooseBest(scriptRet, jsonFileRet):
         oneDis = int(one[1:].split('+')[1], 10)
         twoDis = int(two[1:].split('+')[1], 10)
 
-    except Exception,e:
+    except Exception as e:
         return '===[E]===:' + scriptRet
 
     if oneDis < twoDis:
@@ -181,26 +181,26 @@ def checkIfAnalysisError(frameString):
     try:
         # skip first methold type char "-/+" and turn distance to int
         dis = int(frameString_strip[1:].split('+')[1], 10)
-    except Exception,e:
+    except Exception as e:
         return '===[E]===:' + frameString
-    
+
     if 'cxx_destruct' in frameString:
         return "Maybe c function? Found [OC .cxx_destruct]  # Symbol:{}".format(frameString)
-        
+
     if 'cxx_construct' in frameString:
         return "Maybe c function? Found [OC .cxx_construct] # Symbol:{}".format(frameString)
-        
+
     if dis >= maxDis:
         return 'Maybe c function? Distance:{} >= {} # Symbol:{}'.format(dis, maxDis, frameString)
     else:
         return frameString
-    
+
 def findBlockSymbolFromAdress(address):
     try:
         f = open(BLOCK_JSON_FILE, 'r')
         symbolJsonArr = json.loads(f.read())
         f.close()
-    except Exception,e:
+    except Exception as e:
         return "ERROR in handle json file, check file path and content is correct:{}. + 0".format(BLOCK_JSON_FILE)
 
     if type(address) is int:
@@ -216,7 +216,7 @@ def findBlockSymbolFromAdress(address):
         if blockAddr <= address and (address - blockAddr) <= theDis:
             theDis = address - blockAddr
             theSymbol = block['name']
-    
+
     result = theSymbol + ' + ' + str(theDis)
     return result
 
@@ -226,7 +226,7 @@ def isMainModuleFromAddress(target,debugger,address):
     moduleName = addr.module.file.basename
     modulePath = str(addr.module.file)
     #  get executable path
-    getExecutablePathScript = r''' 
+    getExecutablePathScript = r'''
     const char *path = (char *)[[[NSBundle mainBundle] executablePath] UTF8String];
     path
     '''
@@ -250,7 +250,7 @@ def isMainModuleFromAddress(target,debugger,address):
         return False
 
 def getImageInfoFromAddress(debugger, address):
-    command_script = 'void * targetAddr = (void*)' + address + ';' 
+    command_script = 'void * targetAddr = (void*)' + address + ';'
     command_script += r'''
     NSMutableString* retStr = [NSMutableString string];
 
@@ -273,7 +273,7 @@ def getImageInfoFromAddress(debugger, address):
     [retStr appendString:@(module_path)];
     [retStr appendString:@","];
     [retStr appendString:(id)[@(module_base) stringValue]];
-    
+
     retStr
     '''
     retStr = exeScript(debugger, command_script)
@@ -287,7 +287,7 @@ def exeScript(debugger,command_script):
     if not res.HasResult():
         # something error
         return res.GetError()
-            
+
     response = res.GetOutput()
     return response
 
@@ -295,14 +295,14 @@ def findSymbolFromAddressScript(frame_addr, module_path):
     command_script = 'uintptr_t frame_addr =' + str(frame_addr) + ';'
     command_script += 'const char *path =\"' + str(module_path) + '\";'
     command_script += r'''
-    
+
     // NSMutableDictionary *retdict = [NSMutableDictionary dictionary];
     // NSMutableArray *retArr = [NSMutableArray array];
 
     unsigned int c_size = 0;
     //const char *path = (char *)[[[NSBundle mainBundle] executablePath] UTF8String];
     const char **allClasses = (const char **)objc_copyClassNamesForImage(path, &c_size);
-    
+
     NSString *c_size_str = [@(c_size) stringValue];
 
     uintptr_t tmpDis = 0;

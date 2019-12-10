@@ -1,12 +1,12 @@
- #  ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ 
- # |______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______| 
- #        _        ___  _      _      _____  ____   
- #       (_)      / _ \| |    | |    |  __ \|  _ \  
- #  __  ___  __ _| | | | |    | |    | |  | | |_) | 
- #  \ \/ / |/ _` | | | | |    | |    | |  | |  _ <  
- #   >  <| | (_| | |_| | |____| |____| |__| | |_) | 
- #  /_/\_\_|\__,_|\___/|______|______|_____/|____/                                                                                                                   
- #  ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ 
+ #  ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______
+ # |______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|
+ #        _        ___  _      _      _____  ____
+ #       (_)      / _ \| |    | |    |  __ \|  _ \
+ #  __  ___  __ _| | | | |    | |    | |  | | |_) |
+ #  \ \/ / |/ _` | | | | |    | |    | |  | |  _ <
+ #   >  <| | (_| | |_| | |____| |____| |__| | |_) |
+ #  /_/\_\_|\__,_|\___/|______|______|_____/|____/
+ #  ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______
  # |______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|
 
 '''
@@ -16,7 +16,7 @@ specail thanks to xia0z & Proteas
 '''
 
 import lldb
-import commands
+# import commands
 import shlex
 import optparse
 import re
@@ -31,7 +31,7 @@ def __lldb_init_module (debugger, dict):
 
 def create_command_arguments(command):
     return shlex.split(command)
-    
+
 def is_command_valid(args):
     if len(args) == 0:
         return False
@@ -96,7 +96,7 @@ def is_class_method(arg):
         return True
     else:
         return False
-    
+
 def get_selected_frame():
     debugger = lldb.debugger
     target = debugger.GetSelectedTarget()
@@ -135,7 +135,7 @@ def get_instance_method_address(class_name, method_name):
         return 0
 
     method_addr = frame.EvaluateExpression('(void *)class_getMethodImplementation(%d, %d)' % (class_addr, sel_addr))
-    
+
     return method_addr.GetValueAsUnsigned()
 
 def exeScript(debugger,command_script):
@@ -146,7 +146,7 @@ def exeScript(debugger,command_script):
     if not res.HasResult():
         # something error
         return res.GetError()
-            
+
     response = res.GetOutput()
     return response
 
@@ -158,13 +158,13 @@ def exeCommand(debugger, command):
     if not res.HasResult():
         # something error
         return res.GetError()
-            
+
     response = res.GetOutput()
     return response
 
 def getAllMethodAddressOfClass(debugger, classname):
 
-    command_script = 'const char* className = "' + classname + '";' 
+    command_script = 'const char* className = "' + classname + '";'
 
     command_script += r'''
     //NSMutableArray *mAddrArr = [NSMutableArray array];
@@ -173,13 +173,13 @@ def getAllMethodAddressOfClass(debugger, classname):
     unsigned int m_size = 0;
     Class cls = objc_getClass(className);
     struct objc_method ** metholds = (struct objc_method **)class_copyMethodList(cls, &m_size);
-    
+
 
     for (int j = 0; j < m_size; j++) {
         struct objc_method * meth = metholds[j];
         id implementation = (id)method_getImplementation(meth);
         NSString* m_name = NSStringFromSelector((SEL)method_getName(meth));
-        
+
         //[mAddrArr addObject:(id)[@((uintptr_t)implementation) stringValue]];
         [retStr appendString:(id)[@((uintptr_t)implementation) stringValue]];
         [retStr appendString:@"-"];
@@ -205,7 +205,7 @@ def getMachODATAModInitFirstAddress(debugger):
     command_script += r'''
     //NSMutableString* retStr = [NSMutableString string];
 
-    #define MH_MAGIC_64 0xfeedfacf 
+    #define MH_MAGIC_64 0xfeedfacf
     #define LC_SEGMENT_64   0x19
     typedef int                     integer_t;
     typedef integer_t       cpu_type_t;
@@ -274,11 +274,11 @@ def getMachODATAModInitFirstAddress(debugger):
         /* go through all load command to find __TEXT segment*/
         struct load_command * lcp = (struct load_command *)((uint8_t*)header + x_offset);
         x_offset += lcp->cmdsize;
-        
+
         if(lcp->cmd == LC_SEGMENT_64) {
             struct segment_command_64 * curSegment = (struct segment_command_64 *)lcp;
             struct section_64* curSection = (struct section_64*)((uint8_t*)curSegment + sizeof(struct segment_command_64));
-            
+
             if(!strcmp(curSection->segname, "__DATA")){
 
                 for (int i = 0; i < curSegment->nsects; i++) {
@@ -305,11 +305,11 @@ def getMachODATAModInitFirstAddress(debugger):
     return hexIntInStr(retStr)
 
 def getMachOEntryOffset(debugger):
-    command_script = '@import Foundation;' 
+    command_script = '@import Foundation;'
     command_script += r'''
     //NSMutableString* retStr = [NSMutableString string];
 
-    #define MH_MAGIC_64 0xfeedfacf 
+    #define MH_MAGIC_64 0xfeedfacf
     #define LC_SEGMENT_64   0x19
     #define LC_REQ_DYLD     0x80000000
     #define LC_MAIN         (0x28|LC_REQ_DYLD)
@@ -389,7 +389,7 @@ def getMachOEntryOffset(debugger):
         struct load_command * lcp = (struct load_command *)((uint8_t*)header + x_offset);
         x_offset += lcp->cmdsize;
         if(lcp->cmd == LC_MAIN) {
-            uintptr_t slide =  (uintptr_t)_dyld_get_image_vmaddr_slide(0);          
+            uintptr_t slide =  (uintptr_t)_dyld_get_image_vmaddr_slide(0);
             struct entry_point_command* main_cmd = (struct entry_point_command*)lcp;
             main_addr = (uint64_t)slide + main_cmd->entryoff + 0x100000000;
 
@@ -420,21 +420,21 @@ def getMachOEntryOffset(debugger):
     return retStr
 
 def getMainImagePath(debugger):
-    command_script = '@import Foundation;' 
+    command_script = '@import Foundation;'
     command_script += r'''
 
     // const char *path = (char *)[[[NSBundle mainBundle] executablePath] UTF8String];
     id bundle = objc_msgSend((Class)objc_getClass("NSBundle"), @selector(mainBundle));
     id exePath = objc_msgSend((id)bundle, @selector(executablePath));
     const char *path  = (char *)objc_msgSend((id)exePath, @selector(UTF8String));
-    
+
     path
     '''
     retStr = exeScript(debugger, command_script)
     return retStr
 
 def getProcessModuleSlide(debugger, modulePath):
-    command_script = '@import Foundation;' 
+    command_script = '@import Foundation;'
     command_script += r'''
     uint32_t count = (uint32_t)_dyld_image_count();
     NSMutableString* retStr = [NSMutableString string];
@@ -442,7 +442,7 @@ def getProcessModuleSlide(debugger, modulePath):
     NSString* image_name = @"";
     const char *path = (char *)[[[NSBundle mainBundle] executablePath] UTF8String];
     '''
-   
+
     if modulePath:
         command_script += 'NSString* modulePath = @"{}"\n'.format(modulePath)
     else:
@@ -489,7 +489,7 @@ def xbr(debugger, command, result, dict):
             targetAddr_int = int(targetAddr, 16)
         else:
             targetAddr_int = int(targetAddr, 10)
-          
+
         print("[*] breakpoint at address:{}".format(ILOG(hex(targetAddr_int))))
         lldb.debugger.HandleCommand ('breakpoint set --address %d' % targetAddr_int)
         return
@@ -509,7 +509,7 @@ def xbr(debugger, command, result, dict):
             print(ELOG("[*] you should specail the -E options:[main/init]"))
 
         return
-        
+
 
     # check is arg is address ? mean auto add slide
     if is_just_address_cmd(args):
@@ -531,7 +531,7 @@ def xbr(debugger, command, result, dict):
         if options.hacker:
             if modulePath:
                 targetImagePath = modulePath
-            else:               
+            else:
                 mainImagePath = getMainImagePath(debugger)
                 mainImagePath = mainImagePath.strip()[1:-1]
                 targetImagePath = mainImagePath
@@ -551,11 +551,11 @@ def xbr(debugger, command, result, dict):
 
             moduleSlide = getProcessModuleSlide(debugger, modulePath)
             moduleSlide = int(moduleSlide, 10)
-            
+
         brAddr = moduleSlide + targetAddr_int
 
         print("[*] ida's address:{} module slide:{} target breakpoint address:{}".format(ILOG(hex(targetAddr_int)), ILOG(hex(moduleSlide)), ILOG(hex(brAddr))))
-        
+
         lldb.debugger.HandleCommand ('breakpoint set --address %d' % brAddr)
         return
 
@@ -570,14 +570,14 @@ def xbr(debugger, command, result, dict):
             address = int(addr)
             if address:
                 lldb.debugger.HandleCommand ('breakpoint set --address %x' % address)
-        
+
         result.AppendMessage("Set %ld breakpoints of %s" % (len(addrArr),classname))
         return
-    
+
 
 
     if not is_command_valid(raw_args):
-        print 'please specify the param, for example: "-[UIView initWithFrame:]"'
+        print('please specify the param, for example: "-[UIView initWithFrame:]"')
         return
 
     arg_ = raw_args[0]
@@ -596,7 +596,7 @@ def xbr(debugger, command, result, dict):
     if address:
         lldb.debugger.HandleCommand ('breakpoint set --address %x' % address)
     else:
-        print "fail, please check the arguments"
+        print("fail, please check the arguments")
 
 def generate_option_parser():
     usage = "usage: xbr [-a/-m/-E] args"

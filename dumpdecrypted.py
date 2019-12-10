@@ -1,12 +1,12 @@
- #  ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ 
- # |______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______| 
- #        _        ___  _      _      _____  ____   
- #       (_)      / _ \| |    | |    |  __ \|  _ \  
- #  __  ___  __ _| | | | |    | |    | |  | | |_) | 
- #  \ \/ / |/ _` | | | | |    | |    | |  | |  _ <  
- #   >  <| | (_| | |_| | |____| |____| |__| | |_) | 
- #  /_/\_\_|\__,_|\___/|______|______|_____/|____/                                                                                                                   
- #  ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ 
+ #  ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______
+ # |______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|
+ #        _        ___  _      _      _____  ____
+ #       (_)      / _ \| |    | |    |  __ \|  _ \
+ #  __  ___  __ _| | | | |    | |    | |  | | |_) |
+ #  \ \/ / |/ _` | | | | |    | |    | |  | |  _ <
+ #   >  <| | (_| | |_| | |____| |____| |__| | |_) |
+ #  /_/\_\_|\__,_|\___/|______|______|_____/|____/
+ #  ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______
  # |______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|
 
 import lldb
@@ -23,7 +23,7 @@ def __lldb_init_module(debugger, internal_dict):
     print('[dumpdecrypted]: the lldb dumpdecrypted version')
     print('\tdumpdecrypted')
     print('\tmore usage, try "dumpdecrypted -h"')
-                    
+
 def handle_command(debugger, command, exe_ctx, result, internal_dict):
     command_args = shlex.split(command, posix=False)
     parser = generate_option_parser()
@@ -32,25 +32,25 @@ def handle_command(debugger, command, exe_ctx, result, internal_dict):
     except:
         result.SetError(parser.usage)
         return
-        
+
     target = exe_ctx.target
     thread = exe_ctx.thread
-    
+
     if options.modulePath and options.moduleIdx:
         module_path = options.modulePath
         module_idx = options.moduleIdx
         print("[*] you manual set dump module idx:{} and path:{}".format(module_idx, module_path))
         ret = dumpdecrypted(debugger, module_path, module_idx)
-    else:   
+    else:
         ret = dumpdecrypted(debugger)
 
     result.AppendMessage(str(ret))
-            
-    return 
+
+    return
 
 def getMainImagePath(debugger):
-    
-    command_script = r''' 
+
+    command_script = r'''
     const char *path = (char *)[[[NSBundle mainBundle] executablePath] UTF8String];
     path
     '''
@@ -60,7 +60,7 @@ def getMainImagePath(debugger):
     return ret[1:-1]
 
 def getMainImageMachOHeader(debugger):
-    command_script = r''' 
+    command_script = r'''
 
     typedef integer_t       cpu_type_t;
     typedef integer_t       cpu_subtype_t;
@@ -87,10 +87,10 @@ def getMainImageMachOHeader(debugger):
     return hex(int(ret, 10))
 
 def getAllImageOfApp(debugger, appDir):
-    command_script = '@import Foundation;NSString* appDir = @"' + appDir + '";' 
+    command_script = '@import Foundation;NSString* appDir = @"' + appDir + '";'
     command_script += r'''
     NSMutableString* retStr = [NSMutableString string];
-    
+
     uint32_t count = (uint32_t)_dyld_image_count();
     for(uint32_t i = 0; i < count; i++){
         char* curModuleName_cstr = (char*)_dyld_get_image_name(i);
@@ -148,7 +148,7 @@ def dumpMachoToFile(debugger, machoIdx, machoPath):
     typedef integer_t       cpu_subtype_t;
     typedef integer_t       cpu_threadtype_t;
 
-    
+
 
     #define swap32(value) (((value & 0xFF000000) >> 24) | ((value & 0x00FF0000) >> 8) | ((value & 0x0000FF00) << 8) | ((value & 0x000000FF) << 24) )
 
@@ -199,7 +199,7 @@ def dumpMachoToFile(debugger, machoIdx, machoPath):
         uint32_t    align;      /* alignment as a power of 2 */
     };
     '''
-    command_script_init = 'struct mach_header* mh = (struct mach_header*)_dyld_get_image_header({});'.format(machoIdx) 
+    command_script_init = 'struct mach_header* mh = (struct mach_header*)_dyld_get_image_header({});'.format(machoIdx)
     command_script_init += 'const char *path = "{}"'.format(machoPath)
 
     command_script = command_script_header + command_script_init
@@ -214,7 +214,7 @@ def dumpMachoToFile(debugger, machoIdx, machoPath):
     unsigned int fileoffs = 0, off_cryptid = 0, restsize;
     int i,fd,outfd,r,n,toread;
     char *tmp;
-    
+
     if ((char*)realpath(path, rpath) == NULL) {
         strlcpy(rpath, path, sizeof(rpath));
     }
@@ -248,11 +248,11 @@ def dumpMachoToFile(debugger, machoIdx, machoPath):
             }
 
             off_cryptid=(off_t)((uint8_t*)&eic->cryptid - (uint8_t*)mh);
-            
+
             printf("[+] offset to cryptid found: @%p(from %p) = %x\n", &eic->cryptid, mh, off_cryptid);
-            
+
             printf("[+] Found encrypted data at address %08x of length %u bytes - type %u.\n", eic->cryptoff, eic->cryptsize, eic->cryptid);
-            
+
             printf("[+] Opening %s for reading.\n", rpath);
 
             fd = (int)open(rpath, O_RDONLY);
@@ -292,9 +292,9 @@ def dumpMachoToFile(debugger, machoIdx, machoPath):
                 break;
             }
 
-            // NSDocumentDirectory == 9 NSUserDomainMask == 1   
+            // NSDocumentDirectory == 9 NSUserDomainMask == 1
             NSString *docPath = ((NSArray*)NSSearchPathForDirectoriesInDomains(9, 1, YES))[0];
-            
+
             strlcpy(npath, docPath.UTF8String, sizeof(npath));
             strlcat(npath, tmp, sizeof(npath));
             strlcat(npath, ".decrypted", sizeof(npath));
@@ -305,7 +305,7 @@ def dumpMachoToFile(debugger, machoIdx, machoPath):
             if (outfd == -1) {
                 if ((int)strncmp("/private/var/mobile/Applications/", rpath, 33) == 0) {
                     printf("[-] Failed opening. Most probably a sandbox issue. Trying something different.\n");
-                    
+
                     /* create new name */
                     strlcpy(npath, "/private/var/mobile/Applications/", sizeof(npath));
                     tmp = (char*)strchr(rpath+33, '/');
@@ -329,10 +329,10 @@ def dumpMachoToFile(debugger, machoIdx, machoPath):
 
             /* calculate address of beginning of crypted data */
             n = fileoffs + eic->cryptoff;
-            
+
             restsize = (off_t)lseek(fd, 0, SEEK_END) - n - eic->cryptsize;
             (off_t)lseek(fd, 0, SEEK_SET);
-            
+
             printf("[+] Copying the not encrypted start of the file\n");
             /* first copy all the data before the encrypted data */
             while (n > 0) {
@@ -343,7 +343,7 @@ def dumpMachoToFile(debugger, machoIdx, machoPath):
                     return;
                 }
                 n -= r;
-                
+
                 r = (long)write(outfd, x_buffer, toread);
                 if (r != toread) {
                     printf("[-] Error writing file\n");
@@ -365,7 +365,7 @@ def dumpMachoToFile(debugger, machoIdx, machoPath):
                 printf("[-] Error writing file r=%lx offset=%lx size=%lx flag=%lx\n", r,eic->cryptoff, eic->cryptsize, flag);
                 return;
             }
-            
+
             /* and finish with the remainder of the file */
             n = restsize;
             (off_t)lseek(fd, eic->cryptsize, SEEK_CUR);
@@ -378,7 +378,7 @@ def dumpMachoToFile(debugger, machoIdx, machoPath):
                     return;
                 }
                 n -= r;
-                
+
                 r = (long)write(outfd, x_buffer, toread);
                 if (r != toread) {
                     printf("[-] Error writing file\n");
@@ -393,7 +393,7 @@ def dumpMachoToFile(debugger, machoIdx, machoPath):
                     printf("[-] Error writing cryptid value\n");
                 }
             }
-            
+
             printf("[+] Closing original file\n");
             close(fd);
             printf("[+] Closing dump file\n");
@@ -405,11 +405,11 @@ def dumpMachoToFile(debugger, machoIdx, machoPath):
     }
 
     printf("[*] This mach-o file decrypted done.\n");
-      
+
     NSMutableString* retStr = [NSMutableString string];
     [retStr appendString:@"[+] dump macho file at:"];
     [retStr appendString:@(npath)];
-    
+
     retStr
     '''
     ret = exeScript(debugger, command_script)
@@ -420,15 +420,15 @@ def dumpMachoToFile(debugger, machoIdx, machoPath):
 def dumpdecrypted(debugger,modulePath=None, moduleIdx=None):
     #dumpMachoToFile(debugger,)
     if modulePath and moduleIdx:
-        print dumpMachoToFile(debugger, moduleIdx, modulePath)
+        print(dumpMachoToFile(debugger, moduleIdx, modulePath))
     else:
         mainImagePath = getMainImagePath(debugger)
         appDir = os.path.dirname(mainImagePath)
-        
+
         appImagesStr = getAllImageOfApp(debugger, appDir)
-        
+
         appImagesArr = appImagesStr.split("#")
-        
+
         for imageInfo in appImagesArr:
             if not imageInfo:
                 continue
@@ -439,7 +439,7 @@ def dumpdecrypted(debugger,modulePath=None, moduleIdx=None):
                 print("[*] start dump ["+ info[0] +"] image:" + info[1])
                 # print "idx:" + info[0]
                 # print "path:" + info[1]
-                print dumpMachoToFile(debugger, info[0], info[1])
+                print(dumpMachoToFile(debugger, info[0], info[1]))
 
     return "\n\n[*] Developed By xia0@2019"
 
@@ -451,7 +451,7 @@ def exeScript(debugger,command_script):
     if not res.HasResult():
         # something error
         return res.GetError()
-            
+
     response = res.GetOutput()
     return response
 

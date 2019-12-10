@@ -1,13 +1,13 @@
 
- #  ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ 
- # |______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______| 
- #        _        ___  _      _      _____  ____   
- #       (_)      / _ \| |    | |    |  __ \|  _ \  
- #  __  ___  __ _| | | | |    | |    | |  | | |_) | 
- #  \ \/ / |/ _` | | | | |    | |    | |  | |  _ <  
- #   >  <| | (_| | |_| | |____| |____| |__| | |_) | 
- #  /_/\_\_|\__,_|\___/|______|______|_____/|____/                                                                                                                   
- #  ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ 
+ #  ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______
+ # |______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|
+ #        _        ___  _      _      _____  ____
+ #       (_)      / _ \| |    | |    |  __ \|  _ \
+ #  __  ___  __ _| | | | |    | |    | |  | | |_) |
+ #  \ \/ / |/ _` | | | | |    | |    | |  | |  _ <
+ #   >  <| | (_| | |_| | |____| |____| |__| | |_) |
+ #  /_/\_\_|\__,_|\___/|______|______|_____/|____/
+ #  ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______
  # |______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|
 
 import lldb
@@ -24,7 +24,7 @@ def __lldb_init_module(debugger, internal_dict):
     print('[patcher]: patch code in lldb')
     print('\tpatcher -a patch_addr -i instrument -s instrument_count')
     print('\tmore usage, try "patcher -h"')
-                    
+
 def handle_command(debugger, command, exe_ctx, result, internal_dict):
     command_args = shlex.split(command, posix=False)
     parser = generate_option_parser()
@@ -33,7 +33,7 @@ def handle_command(debugger, command, exe_ctx, result, internal_dict):
     except:
         result.SetError(parser.usage)
         return
-        
+
     target = exe_ctx.target
     thread = exe_ctx.thread
 
@@ -54,7 +54,7 @@ def handle_command(debugger, command, exe_ctx, result, internal_dict):
 
             print("[*] you not set patch address, default is current pc address:{}".format(found))
             patch_addr = int(found, 16)
-        
+
         patch_ins = options.patchInstrument
         # default instrument size is 1
         patch_size = 0x1
@@ -80,17 +80,17 @@ def exeCommand(debugger, command):
     if not res.HasResult():
         # something error
         return res.GetError()
-            
+
     response = res.GetOutput()
     return response
 
 
 def getTextSegmentAddr(debugger):
-    command_script = '@import Foundation;' 
+    command_script = '@import Foundation;'
     command_script += r'''
     //NSMutableString* retStr = [NSMutableString string];
 
-    #define MH_MAGIC_64 0xfeedfacf 
+    #define MH_MAGIC_64 0xfeedfacf
     #define LC_SEGMENT_64   0x19
     typedef int                     integer_t;
     typedef integer_t       cpu_type_t;
@@ -159,15 +159,15 @@ def getTextSegmentAddr(debugger):
         /* go through all load command to find __TEXT segment*/
         struct load_command * lcp = (struct load_command *)((uint8_t*)header + x_offset);
         x_offset += lcp->cmdsize;
-        
+
         if(lcp->cmd == LC_SEGMENT_64) {
             struct segment_command_64 * curSegment = (struct segment_command_64 *)lcp;
             struct section_64* curSection = (struct section_64*)((uint8_t*)curSegment + sizeof(struct segment_command_64));
-            
+
             // check current section of segment is __TEXT?
             if(!strcmp(curSection->segname, "__TEXT") && !strcmp(curSection->sectname, "__text")){
                 uint64_t memAddr = curSection->addr;
-               
+
                 textStart = memAddr + (uint64_t)_dyld_get_image_vmaddr_slide(0);
                 textEnd = textStart + curSection->size;
                 /*
@@ -217,14 +217,14 @@ def patch_code(debugger, addr, ins, count):
         #define PAGE_SIZE        0x0000000000004000
 
         #define PAGE_MASK        0x0000000000003fff
-        
+
         #define RTLD_LAZY   0x1
         #define RTLD_NOW    0x2
         #define RTLD_LOCAL  0x4
         #define RTLD_GLOBAL 0x8
 
-        #define VM_PROT_READ    ((vm_prot_t) 0x01) 
-        #define VM_PROT_WRITE   ((vm_prot_t) 0x02)  
+        #define VM_PROT_READ    ((vm_prot_t) 0x01)
+        #define VM_PROT_WRITE   ((vm_prot_t) 0x02)
         #define VM_PROT_EXECUTE ((vm_prot_t) 0x04)
 
         #define PROT_NONE   0x00    /* [MC2] no permissions */
@@ -267,7 +267,7 @@ def patch_code(debugger, addr, ins, count):
             boolean_t       is_submap;  /* submap vs obj */
             vm_behavior_t       behavior;   /* access behavior hint */
             vm32_object_id_t    object_id;  /* obj/map name, not a handle */
-            unsigned short      user_wired_count; 
+            unsigned short      user_wired_count;
         };
 
         typedef unsigned int        __darwin_natural_t;
@@ -284,9 +284,9 @@ def patch_code(debugger, addr, ins, count):
 
         typedef int                     __int32_t;
 
-        typedef __int32_t       __darwin_pid_t;   
+        typedef __int32_t       __darwin_pid_t;
 
-        typedef __darwin_pid_t        pid_t; 
+        typedef __darwin_pid_t        pid_t;
 
         // init value
         kern_return_t kret;
@@ -295,7 +295,7 @@ def patch_code(debugger, addr, ins, count):
         /* Set platform binary flag */
         #define FLAG_PLATFORMIZE (1 << 1)
 
-        // platformize_me 
+        // platformize_me
         // https://github.com/pwn20wndstuff/Undecimus/issues/112
         /*
 
@@ -304,15 +304,15 @@ def patch_code(debugger, addr, ins, count):
             //[retStr appendString:@"[-] /usr/lib/libjailbreak.dylib dlopen failed!\n"];
             return false;
         }
-        
+
         // Reset errors
         (const char *)dlerror();
         typedef void (*fix_entitle_prt_t)(pid_t pid, uint32_t what);
         fix_entitle_prt_t ptr = (fix_entitle_prt_t)dlsym(handle, "jb_oneshot_entitle_now");
-        
+
         const char *dlsym_error = (const char *)dlerror();
         if (dlsym_error) return;
-        
+
         ptr((pid_t)getpid(), FLAG_PLATFORMIZE);
         //[retStr appendString:@"\n[+] platformize me success!"];
 
@@ -347,16 +347,16 @@ def patch_code(debugger, addr, ins, count):
         //    mach_vm_write(task_self, (vm_address_t)(new+patch_offset), patch_ret_ins_data, 4);
         memcpy((void *)((uint64_t)new_page+patch_offset), patch_data, patch_data_size);
         //[retStr appendString:@"[+] patch ret[0xc0 0x03 0x5f 0xd6] with memcpy\n"];
-        
+
         // set back to r-x
         (int)mprotect(new_page, PAGE_SIZE, PROT_READ | PROT_EXEC);
         //[retStr appendString:@"[*] set new page back to r-x success!\n"];
 
-        
+
         // remap
         vm_prot_t prot;
         vm_inherit_t inherit;
-        
+
         // get page info
         vm_address_t region = (vm_address_t) page_start;
         vm_size_t region_len = 0;
@@ -375,11 +375,11 @@ def patch_code(debugger, addr, ins, count):
         prot = vm_info.protection & (PROT_READ | PROT_WRITE | PROT_EXEC);
         inherit = vm_info.inheritance;
         //[retStr appendString:@"[*] get page info done.\n"];
-        
+
         vm_prot_t c;
         vm_prot_t m;
         mach_vm_address_t target = (mach_vm_address_t)page_start;
-        
+
         kret = (kern_return_t)mach_vm_remap(self_task, &target, PAGE_SIZE, 0,
                            VM_FLAGS_OVERWRITE, self_task,
                            (mach_vm_address_t) new_page, true,
@@ -398,7 +398,7 @@ def patch_code(debugger, addr, ins, count):
         return true;
     };
     // =====================================================patch code=============================================
-    
+
     patch_code(patch_addr, patch_data, patch_data_size);
 
     [retStr appendString:@"patch done."];
@@ -423,12 +423,12 @@ def patcher(debugger, ins, addr, size):
         return "[x] power by xia0@2019"
 
     supportInsList = {'nop':'0x1f, 0x20, 0x03, 0xd5 ', 'ret':'0xc0, 0x03, 0x5f, 0xd6', 'mov0':'0x00, 0x00, 0x80, 0xd2', 'mov1':'0x20, 0x00, 0x80, 0xd2'}
-    if not supportInsList.has_key(ins):
+    if not ins in supportInsList.keys():
         print("[-] patcher not support this ins type:{}".format(ins))
         return "[x] power by xia0@2019"
 
     print("[*] start patch text at address:{} size:{} to ins:\"{}\" and data:{}".format(hex(addr), size, ins, supportInsList[ins]))
-    
+
     # for i in range(size):
     #     patch_code(debugger, hex(curPatchAddr), supportInsList[ins])
     #     print("[+] current patch address:{} patch done".format(hex(curPatchAddr)))
@@ -451,7 +451,7 @@ def hexIntInStr(needHexStr):
 
     def handler(reobj):
         intvalueStr = reobj.group(0)
-        
+
         r = hex(int(intvalueStr))
         return r
 
@@ -467,7 +467,7 @@ def exeScript(debugger,command_script):
     if not res.HasResult():
         # something error
         return res.GetError()
-            
+
     response = res.GetOutput()
     return response
 
@@ -499,5 +499,5 @@ def generate_option_parser():
             default=None,
             dest='patchSize',
             help="patch instrument count")
-                        
+
     return parser

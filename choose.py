@@ -1,12 +1,12 @@
- #  ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ 
- # |______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______| 
- #        _        ___  _      _      _____  ____   
- #       (_)      / _ \| |    | |    |  __ \|  _ \  
- #  __  ___  __ _| | | | |    | |    | |  | | |_) | 
- #  \ \/ / |/ _` | | | | |    | |    | |  | |  _ <  
- #   >  <| | (_| | |_| | |____| |____| |__| | |_) | 
- #  /_/\_\_|\__,_|\___/|______|______|_____/|____/                                                                                                                   
- #  ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ 
+ #  ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______
+ # |______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|
+ #        _        ___  _      _      _____  ____
+ #       (_)      / _ \| |    | |    |  __ \|  _ \
+ #  __  ___  __ _| | | | |    | |    | |  | | |_) |
+ #  \ \/ / |/ _` | | | | |    | |    | |  | |  _ <
+ #   >  <| | (_| | |_| | |____| |____| |__| | |_) |
+ #  /_/\_\_|\__,_|\___/|______|______|_____/|____/
+ #  ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______
  # |______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|
 
 import lldb
@@ -23,7 +23,7 @@ def __lldb_init_module(debugger, internal_dict):
     print('[choose]: cycript choose on lldb')
     print('\tchoose "className"')
     print('\tmore usage, try "choose -h"')
-            
+
 def handle_command(debugger, command, exe_ctx, result, internal_dict):
     command_args = shlex.split(command, posix=False)
     parser = generate_option_parser()
@@ -32,35 +32,35 @@ def handle_command(debugger, command, exe_ctx, result, internal_dict):
     except:
         result.SetError(parser.usage)
         return
-        
+
     target = exe_ctx.target
     thread = exe_ctx.thread
-    
+
     if not args:
         ret = "[usage] choose className"
     else:
         ret = choose(debugger, str(args[0]))
-        
+
     result.AppendMessage(str(ret))
-    
-    return 
+
+    return
 
 def choose(debugger, classname):
-    command_script = 'NSString * className = @"' + classname + '";' 
+    command_script = 'NSString * className = @"' + classname + '";'
     command_script += r'''
-    
+
     // define
     #define KERN_SUCCESS 0
-    
+
     // typedef
     typedef unsigned long       uintptr_t;
 
-    
+
     #define MALLOC_PTR_IN_USE_RANGE_TYPE    1
     typedef int kern_return_t;
     typedef unsigned int mach_port_t;
     typedef mach_port_t     task_t;
-    
+
     typedef uintptr_t       vm_offset_t;
     typedef vm_offset_t         vm_address_t;
     typedef uintptr_t       vm_size_t;
@@ -68,33 +68,33 @@ def choose(debugger, classname):
         vm_address_t    address;
         vm_size_t       size;
     } vm_range_t;
-    
+
     typedef kern_return_t (*memory_reader_t)(task_t task, vm_address_t remote_address, vm_size_t size, void **local_memory);
     typedef void (*vm_range_recorder_t)(task_t task, void *baton, unsigned type, vm_range_t *range, unsigned size);
     typedef struct malloc_introspection_t {
         kern_return_t (*enumerator)(task_t task, void *, unsigned type_mask, vm_address_t zone_address, memory_reader_t reader, vm_range_recorder_t recorder); /* enumerates all the malloc pointers in use */
     } malloc_introspection_t;
-    
+
     typedef struct _malloc_zone_t {
-        void  *reserved1; 
-        void  *reserved2; 
-        size_t  (*size)(struct _malloc_zone_t *zone, const void *ptr); 
+        void  *reserved1;
+        void  *reserved2;
+        size_t  (*size)(struct _malloc_zone_t *zone, const void *ptr);
         void  *(*malloc)(struct _malloc_zone_t *zone, size_t size);
-        void  *(*calloc)(struct _malloc_zone_t *zone, size_t num_items, size_t size); 
-        void  *(*valloc)(struct _malloc_zone_t *zone, size_t size); 
+        void  *(*calloc)(struct _malloc_zone_t *zone, size_t num_items, size_t size);
+        void  *(*valloc)(struct _malloc_zone_t *zone, size_t size);
         void  (*free)(struct _malloc_zone_t *zone, void *ptr);
         void  *(*realloc)(struct _malloc_zone_t *zone, void *ptr, size_t size);
-        void  (*destroy)(struct _malloc_zone_t *zone); 
+        void  (*destroy)(struct _malloc_zone_t *zone);
         const char  *zone_name;
-        unsigned  (*batch_malloc)(struct _malloc_zone_t *zone, size_t size, void **results, unsigned num_requested); 
-        void  (*batch_free)(struct _malloc_zone_t *zone, void **to_be_freed, unsigned num_to_be_freed); 
+        unsigned  (*batch_malloc)(struct _malloc_zone_t *zone, size_t size, void **results, unsigned num_requested);
+        void  (*batch_free)(struct _malloc_zone_t *zone, void **to_be_freed, unsigned num_to_be_freed);
         struct malloc_introspection_t *introspect;
         unsigned  version;
         void *(*memalign)(struct _malloc_zone_t *zone, size_t alignment, size_t size);
         void (*free_definite_size)(struct _malloc_zone_t *zone, void *ptr, size_t size);
         size_t  (*pressure_relief)(struct _malloc_zone_t *zone, size_t goal);
     } malloc_zone_t;
-    
+
 
     struct XZChoice {
         NSMutableArray * query_; // std::set<Class> query_;
@@ -104,14 +104,14 @@ def choose(debugger, classname):
     struct XZObjectStruct {
         Class isa_;
     };
-    
+
     // function memory_reader_t
-    
+
     memory_reader_t task_peek = [](task_t task, vm_address_t remote_address, vm_size_t size, void **local_memory) -> kern_return_t {
         *local_memory = (void*) remote_address;
         return KERN_SUCCESS;
     };
-    
+
     // function copy_class_list: get the class list
     typedef Class * (*copy_class_list_t)(size_t &size);
     copy_class_list_t copy_class_list = [](size_t &size) -> Class *{
@@ -123,7 +123,7 @@ def choose(debugger, classname):
                 size = writ;
                 return data;
             }
-            
+
             Class * copy = (Class *)(realloc(data, sizeof(Class) * writ));
             if (copy == NULL) {
                 free(data);
@@ -143,7 +143,7 @@ def choose(debugger, classname):
             size_t size = range.size;
             if (size < sizeof(XZObjectStruct))
                 continue;
-            
+
             uintptr_t * pointers = (uintptr_t *)(data);
     #ifdef __arm64__
             struct objc_class * isa = (struct objc_class *)(pointers[0] & 0x1fffffff8);
@@ -159,7 +159,7 @@ def choose(debugger, classname):
                 uint64_t result_intv = (uint64_t)result;
                 uint64_t isa_intv = (uint64_t)isa;
                 uint64_t data_intv = (uint64_t)data;
-                
+
                 if(result_intv == isa_intv){
                     /*
                     NSMutableString* tmpStr = [NSMutableString string];
@@ -172,13 +172,13 @@ def choose(debugger, classname):
                     [choiz->result_ addObject:tmpStr];
                     continue;
                     */
-                    
+
                     size_t boundary = 496;
-                    
+
                     #ifdef __LP64__
                             boundary *= 2;
                     #endif
-                    
+
                     needed = (size_t)class_getInstanceSize((Class)result));
                     if ((needed <= boundary && (needed + 15) / 16 * 16 != size) || (needed > boundary && (needed + 511) / 512 * 512 != size)){
                         continue;
@@ -188,15 +188,15 @@ def choose(debugger, classname):
             }
         }
     }
-    
+
     XZChoice choice;
     choice.query_ = (NSMutableArray*)[NSMutableArray array];
     choice.result_ = (NSMutableArray*)[NSMutableArray array];
-    
+
     Class _class = NSClassFromString(className);
     size_t number;
     Class * classes = copy_class_list(number);
-    
+
     for (size_t i = 0; i != number; ++i) {
         for (Class current = classes[i]; current != Nil; current = (Class)class_getSuperclass(current)) {
             if (current == _class) {
@@ -206,12 +206,12 @@ def choose(debugger, classname):
         }
     }
     free(classes);
-    
+
     vm_address_t *zones = 0;
     unsigned int num_zones = 0;
     task_t task = 0;
     kern_return_t err = (kern_return_t)malloc_get_all_zones (task, task_peek, &zones, &num_zones);
-    
+
     for (unsigned i = 0; i != num_zones; ++i) {
         const malloc_zone_t * zone = (const malloc_zone_t *)(zones[i]);
         if (zone == NULL || zone->introspect == NULL)
@@ -246,7 +246,7 @@ def choose(debugger, classname):
                 [retStr appendString:@"\n2. po (NSArray*)above_hex_address_vaule : print the NSArray contain NSString"];
                 [retStr appendString:@"\n3. po [(NSArray*)above_hex_address_vaule objectAtIndex:0] : print first NSString"];
                 break;
-            
+
             }else{
 
                 uint64_t objAdrr = (uint64_t)[choosed objectAtIndex:i];
@@ -255,7 +255,7 @@ def choose(debugger, classname):
                 [retStr appendString:@"\n"];
                 [retStr appendString:[(NSObject*)([choosed objectAtIndex:i]) description]];
             }
-            
+
             [retStr appendString:@"\n"];
         }
 
@@ -271,21 +271,21 @@ def parray(debugger, command, result, dict):
     args = shlex.split(command)
     va = lldb.frame.FindVariable(args[0])
     for i in range(0, int(args[1])):
-        print va.GetChildAtIndex(i, 0, 1)
+        print(va.GetChildAtIndex(i, 0, 1))
 
 def hexIntInStr(needHexStr):
 
     def handler(reobj):
         intvalueStr = reobj.group(0)
-        
+
         r = hex(int(intvalueStr))
         return r
 
     pattern = '(?<=\s)[0-9]{1,}(?=\s)'
 
     return re.sub(pattern, handler, needHexStr, flags = 0)
-    
-def attrStr(msg, color='black'):      
+
+def attrStr(msg, color='black'):
     clr = {
     'cyan' : '\033[36m',
     'grey' : '\033[2m',
@@ -316,7 +316,7 @@ def exeScript(debugger,command_script):
     if not res.HasResult():
         # something error
         return res.GetError()
-            
+
     response = res.GetOutput()
     return response
 
@@ -336,5 +336,5 @@ def generate_option_parser():
                     default=None,
                     dest='print childClass',
                     help="print childClass")
-                        
+
     return parser
